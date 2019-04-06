@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block content %}
+ {% block title %}<title>Quality Control</title>{% endblock %}
+ <h2>統計製程監看(不刷新頁面)</h2>
+ <HR SIZE=3>
+ {% load staticfiles %}
+ <script src="{% static 'js/jquery.min.js' %}"></script>
+ <script src="{% static 'js/Highcharts.js' %}"></script>
+
+<div style="float:left; width:261 height:600">
+<table border="1" cellpadding="4" cellspacing="1" height="400">
+	<form  action="" method="POST" name="form1" id="form1">
+		{% csrf_token %}
+		{{postform}}
+    <tr>
+      <th>管制上限</th>
+      <td ><span id='UCL'></span></td>
+    </tr>
+    </tr>
+    <tr>
+      <th>中心線</th>
+      <td ><span id='CL'></span></td>
+    </tr>
+    <tr>
+       <th>管制下限</th>
+       <td> <span id='LCL'></span></td>
+    </tr>
+		<tr>
+		  <td colspan="2" align="center">
+          <input type="submit" name="button" id="button" value="監看" />
+         </td>
+        </tr>
+</form>
+</table>
+</div>     
+ <div id="container" style=" float:left;width: 600px; height: 400px; margin: 50 auto"></div> 
+  <script>
+$(document).ready(function() { 
+ $('#form1').submit(function() {
+    $.ajax({
+            data: $(this).serialize(), // get the form data
+            type: $(this).attr('method'), // GET or POST
+            url: $(this).attr('action'), // the file to call
+            success: function(data){
+              //[chart,drawn_data,violating_point,limit]
+              chart = data[0]
+              drawn_data = data[1]
+              violating_point = data[2]
+              limit = data[3]
+
+               for (var i=0;i<drawn_data.length;i++) {
+      if (violating_point.indexOf(i)>-1 ) { //判斷此index是否在違反管制界線的列表中
+             chart['series'][0].data.push({y:drawn_data[i],color:'red'} );
+        }
+      else {  
+             chart['series'][0].data.push(drawn_data[i]);
+          } 
+    }
+              $('#container').highcharts(data[0]);
+              
+
+              $('#UCL').html(limit['UCL'])
+              $('#CL').html(limit['CL']);
+              $('#LCL').html(limit['LCL']);
+            
+              },
+         
+            error: function(){
+                alert("false");
+            }
+        });
+    return false
+
+});
+});
+setInterval(function() {
+  $("#content").load(location.href+" #content>*","");
+}, 5000); 
+</script>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block content %}
+ {% block title %}<title>Quality Control</title>{% endblock %}
+ <h2>統計製程監看</h2>
+ <HR SIZE=3>
+ {% load staticfiles %}
+ <script src="{% static 'js/jquery.min.js' %}"></script>
+ <script src="{% static 'js/Highcharts.js' %}"></script>
+
+<div style="float:left; width:261 height:600">
+<table border="1" cellpadding="4" cellspacing="1" height="400">
+	<form  action="." method="POST" name="form1" >
+		{% csrf_token %}
+		{{postform}}
+    <tr>
+      <th>管制上限</th>
+      <td>{{UCL|floatformat:2 }}</td>
+    </tr>
+    </tr>
+    <tr>
+      <th>中心線</th>
+      <td>{{CL|floatformat:2 }}</td>
+    </tr>
+    <tr>
+       <th>管制下限</th>
+       <td>{{LCL|floatformat:2 }}</td>
+    </tr>
+		<tr>
+		  <td colspan="2" align="center">
+          <input type="submit" name="button" id="button" value="監看" />
+         </td>
+        </tr>
+</form>
+
+</table>
+</div>
+<div id="container" style=" float:left;width: 800px; height: 400px; margin: 50 auto"></div>
+<script language="JavaScript">
+//<script type="text/javascript" src="/js/themes/gray.js">
+$(document).ready(function() {
+var drawn_data = {{ drawn_data|safe }};
+var violating_point = {{ violating_point|safe }};
+var sample_date = {{sample_date|safe}};
+var chart={
+      marginRight:100,
+      marginLeft:100,
+      type: 'line',
+
+};
+
+  var title={
+      text: '{{chart_type}}' ,  
+   };
+
+  var xAxis={
+        categories: sample_date,
+    };
+  var yAxis={
+      max:{{UCL}}+0.5,  
+      min:{{LCL}}-0.5, 
+      title: {
+         text: 'width (cm)',
+      },
+       plotLines:[{
+        color:'red',               //線的颜色，定义为红色
+        dashStyle:'shortdashdot',   //虛線
+        value:{{UCL}},                //定义在那个值上显示标示线，这里是在x轴上刻度为3的值处垂直化一条线
+        width:2 ,
+        label:{
+          text:'UCL',                  
+          align:'left',                //標籤位置水平居左
+          x: 0  ,                       //标签相相對於被定位的位置水平偏移的像素
+          }             
+      },{
+        color:'red',           
+        dashStyle:'shortdashdot',     
+        value:{{LCL}},               
+        width:2 ,
+        label:{
+          text:'LCL',     
+          align:'left' ,             
+          x: 0 ,                      
+         }       
+      }
+     ]
+    };
+
+  var legend={
+      layout: 'vertical',
+      align: 'right',
+      verticalAlign: 'top',
+      x: 0,
+      y: 150,
+      backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF',
+      borderWidth: 1,
+  }
+
+
+  var series=[{
+            name:'{{ProductID}}',
+            data:[],
+            lineWidth: 3
+        }];
+
+
+  var  plotOptions={
+        line: {
+            dataLabels: {
+                enabled: false   //標記data
+            },
+            enableMouseTracking: true 
+        },
+        series: {
+            marker: {
+                radius: 7
+            }
+        }
+};
+
+
+  for (var i=0;i<drawn_data.length;i++) {
+      if (violating_point.indexOf(i)>-1 ) { //判斷此index是否在違反管制界線的列表中
+            series[0].data.push({y:drawn_data[i],color:'red'} );
+        }
+      else {  
+            series[0].data.push(drawn_data[i]);
+          } 
+    }
+      
+
+
+
+  var json = {};
+  json.chart = chart; 
+  json.title = title;
+  json.xAxis = xAxis;
+  json.yAxis = yAxis;
+  json.legend = legend;
+  json.series = series;
+  json.plotOptions=plotOptions;
+  $('#container').highcharts(json);
+
+
+
+});
+
+</script>
+{% endblock %}

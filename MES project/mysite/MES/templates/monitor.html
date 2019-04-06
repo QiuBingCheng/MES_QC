@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+ {% block title %}<title>Quality Control</title>{% endblock %}
+ <h2>製程及時監控</h2>
+ <HR SIZE=3>
+ {% load staticfiles %}
+ <script src="{% static 'js/jquery.min.js' %}"></script>
+ <script src="{% static 'js/Highcharts.js' %}"></script>
+<div id="container" style=" float:left;width: 800px; height: 400px; margin: 50 auto">
+
+<script language="JavaScript">
+
+$(document).ready(function() { 
+  setInterval("startRequest()",5000);
+});
+function startRequest(){
+    $.ajax({
+            data: $(this).serialize(), // get the form data
+            type: $(this).attr('method'), // GET or POST
+            url: $(this).attr('action'), // the file to call
+            success: function(data){
+              //[chart,drawn_data,violating_point,limit]
+              chart = data[0]
+              drawn_data = data[1]
+              violating_point = data[2]
+              limit = data[3]
+
+               for (var i=0;i<drawn_data.length;i++) {
+      if (violating_point.indexOf(i)>-1 ) { //判斷此index是否在違反管制界線的列表中
+             chart['series'][0].data.push({y:drawn_data[i],color:'red'} );
+        }
+      else {  
+             chart['series'][0].data.push(drawn_data[i]);
+          } 
+    }
+              $('#container').highcharts(data[0]);
+              
+
+              $('#UCL').html(limit['UCL'])
+              $('#CL').html(limit['CL']);
+              $('#LCL').html(limit['LCL']);
+            
+              },
+         
+            error: function(){
+                alert("false");
+            }
+        });
+    return false
+
+};
+</script>
+{% endblock %}
