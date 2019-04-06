@@ -19,6 +19,8 @@
 
 ## 流程說明
 
+### 範例一:平均管制圖
+
 ### 1.請使用者填入表單參數
 
 ![1](<https://github.com/vbjc5275/MES_QC/raw/master/image/1.jpg>)
@@ -26,6 +28,16 @@
 ###  2.展示管制圖
 
 ![2](<https://github.com/vbjc5275/MES_QC/raw/master/image/2.jpg>)
+
+### 範例二：全距管制圖
+
+### 1.請使用者輸入參數
+
+![3](<https://github.com/vbjc5275/MES_QC/raw/master/image/3.jpg>)
+
+### 2.請使用者輸入參數
+
+![4](<https://github.com/vbjc5275/MES_QC/raw/master/image/4.jpg>)
 
 ## 附註
 
